@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
-/usr/local/sbin/one-contextd all reconfigure
+/usr/bin/one-contextd all reconfigure
 exec chpst -b one-contextd pause

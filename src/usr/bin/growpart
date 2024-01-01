@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #    Copyright (C) 2011 Canonical Ltd.
 #    Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 #
@@ -512,6 +512,7 @@ kver_to_num() {
 	min=${kver#${maj}.}
 	min=${min%%.*}
 	mic=${kver#${maj}.${min}.}
+	mic=${mic//[!0-9]/}
 	[ "$kver" = "$mic" ] && mic=0
 	_RET=$(($maj*1000*1000+$min*1000+$mic))
 }

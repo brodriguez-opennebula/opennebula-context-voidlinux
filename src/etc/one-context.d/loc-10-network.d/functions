@@ -211,6 +211,10 @@ detect_os()
             alpine|altlinux|debian|devuan|ubuntu|fedora|centos|rhel|almalinux|ol|rocky|opensuse*|sles|sled|amzn|freebsd)
                 LINUX_ID=$ID
                 ;;
+            # experimental distros
+            void)
+                LINUX_ID=$ID
+                ;;
             *)
                 LINUX_ID=$ID_LIKE
                 ;;

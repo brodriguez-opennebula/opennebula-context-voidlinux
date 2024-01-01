@@ -1,0 +1,337 @@
+#!/usr/bin/env bash
+
+# -------------------------------------------------------------------------- #
+# Copyright 2002-2021, OpenNebula Project, OpenNebula Systems                #
+#                                                                            #
+# Licensed under the Apache License, Version 2.0 (the "License"); you may    #
+# not use this file except in compliance with the License. You may obtain    #
+# a copy of the License at                                                   #
+#                                                                            #
+# http://www.apache.org/licenses/LICENSE-2.0                                 #
+#                                                                            #
+# Unless required by applicable law or agreed to in writing, software        #
+# distributed under the License is distributed on an "AS IS" BASIS,          #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+# See the License for the specific language governing permissions and        #
+# limitations under the License.                                             #
+#--------------------------------------------------------------------------- #
+
+#
+# network module implementation
+#
+
+is_network_supported()
+{
+    case "${os_id}" in
+        void)
+            return 0
+            ;;
+    esac
+
+    return 1
+}
+
+configure_network()
+{
+    gen_resolvconf
+    gen_network_configuration > /etc/network_config
+    source /etc/network_config
+}
+
+# ip -j a | jq ".[] | select(.address==\"$ETH1_MAC\") | .ifname"
+
+stop_network()
+{
+    case "${os_id}" in
+        void)
+	    for i in $(ip -j a | jq -r ".[].ifname"); do 
+                ip add flush $i;
+            done
+            ;;
+        *)
+            exit 1
+            ;;
+    esac
+}
+
+start_network()
+{
+    case "${os_id}" in
+        void)
+            source /etc/network_config
+            ;;
+        *)
+            exit 1
+            ;;
+    esac
+}
+
+reload_network()
+{
+    stop_network
+    start_network
+}
+
+#
+# helper functions
+#
+
+# TODO: remove global variables and get rid off exports
+#
+# to satisfy shellcheck SC2154:
+export os_id
+export ip
+export network
+export mask
+export cidr
+export ip6
+export ip6_prefix_length
+export ip6_ula
+export mac
+export dev
+export mtu
+export gateway
+export ip6_gateway
+export method
+export ip6_method
+export metric
+export ip6_metric
+export dns
+export search_domains
+export external
+export detach
+export all_nameservers
+export all_search_domains
+
+gen_iface_conf()
+{
+    cat <<EOT
+# Configuration of iface ${dev} address ${ip} network ${network} netmask ${mask}
+ip link set dev ${dev} up
+ip add add ${ip}/${mask} dev ${dev}
+EOT
+
+    if [ -n "$mtu" ]; then
+        echo "ip link set dev ${dev} mtu ${mtu}"
+    fi
+
+    if [ -n "$gateway" ]; then
+        echo -n "ip route add default via ${gateway} dev ${dev}"
+
+        if [ -n "$metric" ]; then
+            echo " metric ${metric}"
+        fi
+
+	echo
+    fi
+
+    # Add static routes
+    if [ -n "${static_routes}" ]; then
+
+        IFS=',' read -r -a routes <<< "$static_routes"
+
+        for route in "${routes[@]}"
+        do
+            rsplit=( ${route} )
+            dst="${rsplit[0]}"
+            gw="${rsplit[2]}"
+
+            echo "ip route add ${dst} via ${gw}"
+        done
+
+    fi
+
+    # Add ONEGATE Proxy static route ip route replace 169.254.16.9 dev eth0
+    if missing_onegate_proxy_route; then
+        echo "ip route replace ${onegate_host} dev ${dev}"
+
+        unset onegate_proxy_route_missing
+    fi
+
+    echo ""
+}
+
+##### CONTINUE HERE #####
+
+gen_dhcp_conf()
+{
+    if [ -n "$mtu" ]; then
+        case "${os_id}" in
+            void)
+                echo "ip link set dev ${dev} mtu ${mtu}"
+                ;;
+            *)
+                exit 1
+                ;;
+        esac
+    fi
+
+    echo "dhcpcd -1 -4 ${dev}"
+    echo ""
+}
+
+gen_alias_conf()
+{
+    cat <<EOT
+ip add add ${ip}/${mask} dev ${dev} 
+EOT
+
+echo ""
+}
+
+gen_iface6_conf()
+{
+
+    echo "ip link set dev ${dev} up"
+    if [ -n "${mtu}" ]; then
+        case "${os_id}" in
+            void)
+                echo "ip -6 link set dev ${dev} mtu ${mtu}"
+                echo "echo ${mtu} > /proc/sys/net/ipv6/conf/${dev}/mtu"
+                ;;
+            *)
+                exit 1
+                ;;
+        esac
+    fi
+
+    case "${os_id}" in
+        void)
+            cat <<EOT
+echo 0 > /proc/sys/net/ipv6/conf/${dev}/autoconf
+echo 0 > /proc/sys/net/ipv6/conf/${dev}/accept_ra
+ip -6 add add ${ip6}/${ip6_prefix_length:-64} dev ${dev}
+EOT
+            ;;
+    esac
+
+    if [ "${os_id}" = 'void' ]; then
+       if [ -n "${ip6_gateway}" ]; then
+           echo -n "ip -6 route add default via ${ip6_gateway} dev ${dev}";
+	   if [ -n "${ip6_metric}" ]; then 
+               echo -n "metric ${ip6_metric}";
+	   fi;
+       fi
+    fi
+    echo ""
+
+    if [ -n "${ip6_ula}" ]; then
+        echo "ip -6 add add ${ip6_ula}/64 dev ${dev}"
+    fi
+
+    echo ""
+}
+
+gen_dhcp6_conf()
+{
+#    if [ "${ip6_method}" = "auto" ] ; then
+#        echo "iface ${dev} inet6 auto"
+#    else
+#        echo "iface ${dev} inet6 dhcp"
+#    fi
+
+    case "${os_id}" in
+        void)
+            if [ -n "${mtu}" ]; then
+                echo "ip -6 link set dev ${dev} mtu ${mtu}"
+                echo "echo ${mtu} > /proc/sys/net/ipv6/conf/${dev}/mtu"
+            fi
+
+            echo "echo 0 > /proc/sys/net/ipv6/conf/${dev}/use_tempaddr"
+            echo "ip -6 addr flush dev ${dev} scope global || /bin/true"
+            echo "dhcpcd -1 -6 ${dev}"
+            ;;
+        *)
+            exit 1
+            ;;
+    esac
+
+    echo ""
+}
+
+gen_alias6_conf()
+{
+    case "${os_id}" in
+        void)
+            cat <<EOT
+ip -6 add add ${ip6}/${ip6_prefix_length:-64} dev ${dev} 
+EOT
+            ;;
+    esac
+
+    echo ""
+
+    if [ -n "${ip6_ula}" ]; then
+        cat <<EOT
+ip -6 add add ${ip6_ula}/64 dev ${dev} 
+EOT
+    fi
+
+    echo ""
+}
+
+gen_network_configuration()
+{
+    cat <<EOT
+# Generated by one-context
+ip link add lo type dummy
+ip add flush lo
+ip address add 127.0.0.1/8 dev lo
+
+EOT
+
+    _context_interfaces=$(get_context_interfaces)
+
+    for _iface in $_context_interfaces; do
+        setup_iface_vars "$_iface"
+
+        skip_interface && continue
+
+        case "${method}" in
+            ''|static)
+                [ -n "${ip}" ] && gen_iface_conf
+                ;;
+            dhcp)
+                gen_dhcp_conf
+                ;;
+        esac
+
+        case "${ip6_method}" in
+            ''|static)
+                [ -n "${ip6}" ] && gen_iface6_conf
+                ;;
+            auto|dhcp)
+                gen_dhcp6_conf
+                ;;
+            disable)
+                :
+                ;;
+        esac
+
+        _aliases=$(get_interface_alias "$_iface")
+
+        for _nic_alias in $_aliases ; do
+            setup_ipadr_vars "$_nic_alias"
+            setup_ip6adr_vars "$_nic_alias"
+            setup_alias_vars "$_nic_alias"
+
+            if [ -z "${detach}" ]; then
+                if ! is_true "${external}" ; then
+                    [ -n "${ip}"  ] && gen_alias_conf
+                    [ -n "${ip6}" ] && gen_alias6_conf
+                fi
+            fi
+        done
+    done
+
+    case "${os_id}" in
+        debian|ubuntu|devuan)
+            echo "source /etc/network/interfaces.d/*.cfg"
+            ;;
+    esac
+}
+
+# took from find_ifaces in the networking service
+get_interfaces() {
+    ip -j a | jq -r ".[].ifname";
+}

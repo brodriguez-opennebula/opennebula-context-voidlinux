@@ -52,6 +52,9 @@ if [ -z "${NETCFG_TYPE}" ] ; then
         freebsd)
             NETCFG_TYPE='bsd'
             ;;
+        void)
+            NETCFG_TYPE='iproute2'
+            ;;
         *)
             NETCFG_TYPE='none'
             ;;

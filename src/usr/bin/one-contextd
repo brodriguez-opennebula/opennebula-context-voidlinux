@@ -83,7 +83,11 @@ function log
         fi
 
         if [ "${1}" != 'debug' ]; then
-            local _txt="$(date "+%b %d %T") $(hostname -s) ${SYSLOG_TAG}: ${2}"
+
+            short_hostname=$(hostname -s 2> /dev/null)
+            if [ -z $short_hostname ]; then short_hostname=$(hostname); fi
+
+            local _txt="$(date "+%b %d %T") ${short_hostname} ${SYSLOG_TAG}: ${2}"
 
             local _log=/var/log/messages
             if [ -f /var/log/syslog ]; then
