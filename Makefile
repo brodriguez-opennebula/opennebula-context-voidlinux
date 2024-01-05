@@ -11,7 +11,6 @@ install:
 	install -D -m 540 ./src/etc/one-context.d/loc-20-set-username-password /etc/one-context.d/loc-20-set-username-password
 	install -D -m 540 ./src/etc/one-context.d/loc-14-mount-swap\#\#one /etc/one-context.d/loc-14-mount-swap\#\#one
 	install -D -m 540 ./src/etc/one-context.d/loc-22-ssh_public_key /etc/one-context.d/loc-22-ssh_public_key
-	install -D -m 540 ./src/etc/one-context.d/loc-24-ssh_host_key\#\#deb /etc/one-context.d/loc-24-ssh_host_key\#\#deb
 	install -D -m 540 ./src/etc/one-context.d/loc-09-timezone /etc/one-context.d/loc-09-timezone
 	install -D -m 540 ./src/etc/one-context.d/loc-04-run-dir /etc/one-context.d/loc-04-run-dir
 	install -D -m 540 ./src/etc/one-context.d/net-15-hostname /etc/one-context.d/net-15-hostname
@@ -41,7 +40,6 @@ uninstall:
 	rm /etc/one-context.d/loc-20-set-username-password
 	rm /etc/one-context.d/loc-14-mount-swap\#\#one
 	rm /etc/one-context.d/loc-22-ssh_public_key
-	rm /etc/one-context.d/loc-24-ssh_host_key\#\#deb
 	rm /etc/one-context.d/loc-09-timezone
 	rm /etc/one-context.d/loc-04-run-dir
 	rm /etc/one-context.d/net-15-hostname
