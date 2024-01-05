@@ -8,7 +8,6 @@ install:
 	install -D -m 540 ./src/etc/sv/one-contextd/log/run /etc/sv/one-contextd/log/run
 	install -D -m 540 ./src/etc/one-context.d/net-97-start-script /etc/one-context.d/net-97-start-script
 	install -D -m 540 ./src/etc/one-context.d/loc-16-gen-env /etc/one-context.d/loc-16-gen-env
-	install -D -m 540 ./src/etc/one-context.d/net-11-fix-loopback\#\#deb.one /etc/one-context.d/net-11-fix-loopback\#\#deb.one
 	install -D -m 540 ./src/etc/one-context.d/loc-20-set-username-password /etc/one-context.d/loc-20-set-username-password
 	install -D -m 540 ./src/etc/one-context.d/loc-14-mount-swap\#\#one /etc/one-context.d/loc-14-mount-swap\#\#one
 	install -D -m 540 ./src/etc/one-context.d/loc-22-ssh_public_key /etc/one-context.d/loc-22-ssh_public_key
@@ -39,11 +38,8 @@ uninstall:
 	rm /etc/sv/one-contextd/log/run
 	rm /etc/one-context.d/net-97-start-script
 	rm /etc/one-context.d/loc-16-gen-env
-	rm /etc/one-context.d/net-11-fix-loopback\#\#deb.one
 	rm /etc/one-context.d/loc-20-set-username-password
 	rm /etc/one-context.d/loc-14-mount-swap\#\#one
-	rm /etc/one-context.d/loc-12-firewall\#\#vr
-	rm /etc/one-context.d/loc-15-keepalived\#\#vr
 	rm /etc/one-context.d/loc-22-ssh_public_key
 	rm /etc/one-context.d/loc-24-ssh_host_key\#\#deb
 	rm /etc/one-context.d/loc-09-timezone
@@ -55,7 +51,6 @@ uninstall:
 	rm /etc/one-context.d/loc-10-network.d/functions
 	rm /etc/one-context.d/loc-10-network.d/netcfg-scripts
 	rm /etc/one-context.d/loc-30-console\#\#one
-	rm /etc/one-context.d/loc-15-ip_forward\#\#vr
 	rm /etc/one-context.d/net-99-report-ready
 	rm /etc/one-context.d/loc-05-grow-rootfs
 	rm /etc/one-context.d/loc-10-network
