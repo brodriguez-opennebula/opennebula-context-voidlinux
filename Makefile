@@ -11,8 +11,6 @@ install:
 	install -D -m 540 ./src/etc/one-context.d/net-11-fix-loopback\#\#deb.one /etc/one-context.d/net-11-fix-loopback\#\#deb.one
 	install -D -m 540 ./src/etc/one-context.d/loc-20-set-username-password /etc/one-context.d/loc-20-set-username-password
 	install -D -m 540 ./src/etc/one-context.d/loc-14-mount-swap\#\#one /etc/one-context.d/loc-14-mount-swap\#\#one
-	install -D -m 540 ./src/etc/one-context.d/loc-12-firewall\#\#vr /etc/one-context.d/loc-12-firewall\#\#vr
-	install -D -m 540 ./src/etc/one-context.d/loc-15-keepalived\#\#vr /etc/one-context.d/loc-15-keepalived\#\#vr
 	install -D -m 540 ./src/etc/one-context.d/loc-22-ssh_public_key /etc/one-context.d/loc-22-ssh_public_key
 	install -D -m 540 ./src/etc/one-context.d/loc-24-ssh_host_key\#\#deb /etc/one-context.d/loc-24-ssh_host_key\#\#deb
 	install -D -m 540 ./src/etc/one-context.d/loc-09-timezone /etc/one-context.d/loc-09-timezone
@@ -24,7 +22,6 @@ install:
 	install -D -m 540 ./src/etc/one-context.d/loc-10-network.d/functions /etc/one-context.d/loc-10-network.d/functions
 	install -D -m 540 ./src/etc/one-context.d/loc-10-network.d/netcfg-scripts /etc/one-context.d/loc-10-network.d/netcfg-scripts
 	install -D -m 540 ./src/etc/one-context.d/loc-30-console\#\#one /etc/one-context.d/loc-30-console\#\#one
-	install -D -m 540 ./src/etc/one-context.d/loc-15-ip_forward\#\#vr /etc/one-context.d/loc-15-ip_forward\#\#vr
 	install -D -m 540 ./src/etc/one-context.d/net-99-report-ready /etc/one-context.d/net-99-report-ready
 	install -D -m 540 ./src/etc/one-context.d/loc-05-grow-rootfs /etc/one-context.d/loc-05-grow-rootfs
 	install -D -m 540 ./src/etc/one-context.d/loc-10-network /etc/one-context.d/loc-10-network
